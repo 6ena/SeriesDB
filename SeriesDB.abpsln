@@ -1,0 +1,58 @@
+{
+  "id": "fee58ce6-2ed9-4c84-89c7-9ed90c626589",
+  "creationTime": "01/23/2026 02:45:53 +00:00",
+  "template": "app",
+  "versions": {
+    "AbpFramework": "10.0.2",
+    "AbpStudio": "2.1.6",
+    "TargetDotnetFramework": "net10.0"
+  },
+  "modules": {
+    "SeriesDB": {
+      "path": "SeriesDB.abpmdl"
+    }
+  },
+  "runProfiles": {
+    "Default": {
+      "path": "etc/abp-studio/run-profiles/Default.abprun.json"
+    }
+  },
+  "options": {
+    "httpRequests": {
+      "ignoredUrls": [
+      
+      ]
+    }
+  },
+  "creatingStudioConfiguration": {
+    "template": "app",
+    "createdAbpStudioVersion": "2.1.6",
+    "creationTool": "ABP Studio UI",
+    "tiered": "false",
+    "runInstallLibs": "",
+    "useLocalReferences": "false",
+    "multiTenancy": "false",
+    "includeTests": "true",
+    "kubernetesConfiguration": "false",
+    "uiFramework": "angular",
+    "mobileFramework": "none",
+    "distributedEventBus": "none",
+    "databaseProvider": "ef",
+    "runDbMigrator": "",
+    "databaseManagementSystem": "sqlserver",
+    "separateTenantSchema": "false",
+    "createInitialMigration": "",
+    "theme": "leptonx-lite",
+    "themeStyle": "",
+    "themeMenuPlacement": "",
+    "mobileFramework": "none",
+    "progressiveWebApp": "false",
+    "runProgressiveWebAppSupport": "false",
+    "publicWebsite": "false",
+    "socialLogin": "false",
+    "sampleCrudPage": "false",
+    "selectedLanguages": ["English", "Arabic", "Chinese (Simplified)", "Chinese (Traditional)", "Czech", "English (United Kingdom)", "Finnish", "French", "German (Germany)", "Hindi ", "Hungarian", "Icelandic", "Italian", "Portuguese (Brazil)", "Romanian (Romania)", "Russian", "Slovak", "Spanish", "Swedish", "Turkish", ],
+    "defaultLanguage": "English",
+    "createCommand": "abp new SeriesDB -t app --ui-framework angular --database-provider ef --database-management-system sqlserver --theme leptonx-lite --skip-migration  --skip-migrator  --without-cms-kit --dont-run-install-libs --dont-run-bundling --no-multi-tenancy --no-social-logins -no-gdpr -no-openiddict-admin-ui -no-audit-logging -no-file-management -no-language-management -no-text-template-management"
+  }
+}
