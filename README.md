@@ -1,4 +1,4 @@
-﻿# SeriesDB
+﻿# SerieDB
 
 ## About this solution
 
@@ -13,12 +13,12 @@ This is a layered startup solution based on [Domain Driven Design (DDD)](https:/
 
 The solution comes with a default configuration that works out of the box. However, you may consider to change the following configuration before running your solution:
 
-* Check the `ConnectionStrings` in `appsettings.json` files under the `SeriesDB.HttpApi.Host` and `SeriesDB.DbMigrator` projects and change it if you need.
+* Check the `ConnectionStrings` in `appsettings.json` files under the `SerieDB.HttpApi.Host` and `SerieDB.DbMigrator` projects and change it if you need.
 
 ### Before running the application
 
 * Run `abp install-libs` command on your solution folder to install client-side package dependencies. This step is automatically done when you create a new solution, if you didn't especially disabled it. However, you should run it yourself if you have first cloned this solution from your source control, or added a new client-side package dependency to your solution.
-* Run `SeriesDB.DbMigrator` to create the initial database. This step is also automatically done when you create a new solution, if you didn't especially disabled it. This should be done in the first run. It is also needed if a new database migration is added to the solution later.
+* Run `SerieDB.DbMigrator` to create the initial database. This step is also automatically done when you create a new solution, if you didn't especially disabled it. This should be done in the first run. It is also needed if a new database migration is added to the solution later.
 
 #### Generating a Signing Certificate
 
@@ -27,10 +27,10 @@ In the production environment, you need to use a production signing certificate.
 To generate a signing certificate, you can use the following command:
 
 ```bash
-dotnet dev-certs https -v -ep openiddict.pfx -p 4b140070-2358-4a73-85c4-6736f56217a2
+dotnet dev-certs https -v -ep openiddict.pfx -p 6f7f9f3f-2bcd-4ac3-91c5-6f3d9705aaa4
 ```
 
-> `4b140070-2358-4a73-85c4-6736f56217a2` is the password of the certificate, you can change it to any password you want.
+> `6f7f9f3f-2bcd-4ac3-91c5-6f3d9705aaa4` is the password of the certificate, you can change it to any password you want.
 
 It is recommended to use **two** RSA certificates, distinct from the certificate(s) used for HTTPS: one for encryption, one for signing.
 
@@ -42,8 +42,8 @@ For more information, please refer to: [OpenIddict Certificate Configuration](ht
 
 This is a layered monolith application that consists of the following applications:
 
-* `SeriesDB.DbMigrator`: A console application which applies the migrations and also seeds the initial data. It is useful on development as well as on production environment.
-* `SeriesDB.HttpApi.Host`: ASP.NET Core API application that is used to expose the APIs to the clients.
+* `SerieDB.DbMigrator`: A console application which applies the migrations and also seeds the initial data. It is useful on development as well as on production environment.
+* `SerieDB.HttpApi.Host`: ASP.NET Core API application that is used to expose the APIs to the clients.
 * `angular`: Angular application.
 
 

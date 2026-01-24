@@ -254,17 +254,17 @@ paket-files/
 # ABP Studio
 **/.abpstudio/
 
-# SeriesDB
-src/SeriesDB.Web/Logs/*
-src/SeriesDB.Web.Host/Logs/*
-src/SeriesDB.Web.Public/Logs/*
-src/SeriesDB.Web.Public.Host/Logs/*
-src/SeriesDB.AuthServer/Logs/*
-src/SeriesDB.HttpApi.Host/Logs/*
-src/SeriesDB.HttpApi.Host/Logs/*
-src/SeriesDB.DbMigrator/Logs/*
-src/SeriesDB.Blazor.Server/Logs/*
-src/SeriesDB.Blazor.Server.Tiered/Logs/*
+# SerieDB
+src/SerieDB.Web/Logs/*
+src/SerieDB.Web.Host/Logs/*
+src/SerieDB.Web.Public/Logs/*
+src/SerieDB.Web.Public.Host/Logs/*
+src/SerieDB.AuthServer/Logs/*
+src/SerieDB.HttpApi.Host/Logs/*
+src/SerieDB.HttpApi.Host/Logs/*
+src/SerieDB.DbMigrator/Logs/*
+src/SerieDB.Blazor.Server/Logs/*
+src/SerieDB.Blazor.Server.Tiered/Logs/*
 
 # Use abp install-libs to restore.
 **/wwwroot/libs/*

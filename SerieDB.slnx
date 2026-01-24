@@ -1,0 +1,23 @@
+<Solution>
+    <Configurations>
+        <Platform Name="Any CPU" />
+    </Configurations>
+    <Folder Name="/src/">
+        <Project Path="src/SerieDB.Domain/SerieDB.Domain.csproj" />
+        <Project Path="src/SerieDB.Application/SerieDB.Application.csproj" />
+        <Project Path="src/SerieDB.EntityFrameworkCore/SerieDB.EntityFrameworkCore.csproj" />
+        <Project Path="src/SerieDB.Domain.Shared/SerieDB.Domain.Shared.csproj" />
+        <Project Path="src/SerieDB.Application.Contracts/SerieDB.Application.Contracts.csproj" />
+        <Project Path="src/SerieDB.HttpApi/SerieDB.HttpApi.csproj" />
+        <Project Path="src/SerieDB.HttpApi.Client/SerieDB.HttpApi.Client.csproj" />
+        <Project Path="src/SerieDB.DbMigrator/SerieDB.DbMigrator.csproj" />
+        <Project Path="src/SerieDB.HttpApi.Host/SerieDB.HttpApi.Host.csproj" />
+    </Folder>
+    <Folder Name="/test/">
+        <Project Path="test/SerieDB.Application.Tests/SerieDB.Application.Tests.csproj" />
+        <Project Path="test/SerieDB.EntityFrameworkCore.Tests/SerieDB.EntityFrameworkCore.Tests.csproj" />
+        <Project Path="test/SerieDB.TestBase/SerieDB.TestBase.csproj" />
+        <Project Path="test/SerieDB.Domain.Tests/SerieDB.Domain.Tests.csproj" />
+        <Project Path="test/SerieDB.HttpApi.Client.ConsoleTestApp/SerieDB.HttpApi.Client.ConsoleTestApp.csproj" />
+    </Folder>
+</Solution>

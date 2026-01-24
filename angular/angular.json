@@ -7,7 +7,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "SeriesDB": {
+    "SerieDB": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -22,7 +22,7 @@
           "builder": "@angular/build:application",
           "options": {
             "outputPath": {
-              "base": "dist/SeriesDB"
+              "base": "dist/SerieDB"
             },
             "index": "src/index.html",
             "polyfills": [
@@ -174,10 +174,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "SeriesDB:build:production"
+              "buildTarget": "SerieDB:build:production"
             },
             "development": {
-              "buildTarget": "SeriesDB:build:development"
+              "buildTarget": "SerieDB:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -185,7 +185,7 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n",
           "options": {
-            "buildTarget": "SeriesDB:build"
+            "buildTarget": "SerieDB:build"
           }
         },
         "test": {
