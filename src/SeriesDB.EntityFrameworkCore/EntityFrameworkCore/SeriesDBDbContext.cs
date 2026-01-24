@@ -12,6 +12,7 @@ using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
+using SeriesDB.Series;
 
 namespace SeriesDB.EntityFrameworkCore;
 
@@ -23,7 +24,7 @@ public class SeriesDBDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
-
+    public DbSet<Serie> Series { get; set; }
     #region Entities from the modules
 
     /* Notice: We only implemented IIdentityProDbContext 
@@ -78,5 +79,14 @@ public class SeriesDBDbContext :
         //    b.ConfigureByConvention(); //auto configure for the base class props
         //    //...
         //});
+
+        builder.Entity<Serie>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Series", SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Genero).HasMaxLength(128);
+            //...
+        });
     }
 }

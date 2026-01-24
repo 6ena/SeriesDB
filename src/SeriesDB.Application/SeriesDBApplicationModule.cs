@@ -1,11 +1,12 @@
-﻿using Volo.Abp.PermissionManagement;
-using Volo.Abp.SettingManagement;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SeriesDB.Series;
 using Volo.Abp.Account;
-using Volo.Abp.Identity;
-using Volo.Abp.Mapperly;
 using Volo.Abp.FeatureManagement;
+using Volo.Abp.Identity;
 using Volo.Abp.Modularity;
-using Microsoft.Extensions.DependencyInjection;
+using Volo.Abp.PermissionManagement;
+using Volo.Abp.SettingManagement;
+using Volo.Abp.AutoMapper;
 
 namespace SeriesDB;
 
@@ -20,5 +21,12 @@ namespace SeriesDB;
     )]
 public class SeriesDBApplicationModule : AbpModule
 {
-
+    public override void ConfigureServices(ServiceConfigurationContext context)
+    {
+        Configure<AbpAutoMapperOptions>(options =>
+        {
+            options.AddMaps<SeriesDBApplicationModule>();
+        });
+    }
 }
+
