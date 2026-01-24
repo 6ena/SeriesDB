@@ -14,7 +14,7 @@ $jobs += Start-Job -Name "InstallLibs" -ScriptBlock {
 
 $jobs += Start-Job -Name "DbMigrator" -ScriptBlock {
     $ErrorActionPreference = "Stop"
-    Set-Location (Join-Path $using:scriptRoot "../../src/SerieDB.DbMigrator")
+    Set-Location (Join-Path $using:scriptRoot "../../src/SeriesDB.DbMigrator")
     dotnet run
 
     if ($LASTEXITCODE -ne 0) {
@@ -24,8 +24,8 @@ $jobs += Start-Job -Name "DbMigrator" -ScriptBlock {
 
 $jobs += Start-Job -Name "DevCert" -ScriptBlock {
     $ErrorActionPreference = "Stop"
-    Set-Location (Join-Path $using:scriptRoot "../../src/SerieDB.HttpApi.Host")
-    dotnet dev-certs https -v -ep openiddict.pfx -p 6f7f9f3f-2bcd-4ac3-91c5-6f3d9705aaa4
+    Set-Location (Join-Path $using:scriptRoot "../../src/SeriesDB.HttpApi.Host")
+    dotnet dev-certs https -v -ep openiddict.pfx -p b6f8be27-b196-4640-b381-42d6caa07d3a
 
     if ($LASTEXITCODE -ne 0) {
         throw "dotnet dev-certs exited with code $LASTEXITCODE"

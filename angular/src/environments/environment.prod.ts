@@ -3,11 +3,11 @@ import { Environment } from '@abp/ng.core';
 const baseUrl = 'http://localhost:4200';
 
 const oAuthConfig = {
-  issuer: 'https://localhost:44314/',
+  issuer: 'https://localhost:44345/',
   redirectUri: baseUrl,
-  clientId: 'SerieDB_App',
+  clientId: 'SeriesDB_App',
   responseType: 'code',
-  scope: 'offline_access SerieDB',
+  scope: 'offline_access SeriesDB',
   requireHttps: true,
 };
 
@@ -15,13 +15,13 @@ export const environment = {
   production: true,
   application: {
     baseUrl,
-    name: 'SerieDB',
+    name: 'SeriesDB',
   },
   oAuthConfig,
   apis: {
     default: {
-      url: 'https://localhost:44314',
-      rootNamespace: 'SerieDB',
+      url: 'https://localhost:44345',
+      rootNamespace: 'SeriesDB',
     },
     AbpAccountPublic: {
       url: oAuthConfig.issuer,

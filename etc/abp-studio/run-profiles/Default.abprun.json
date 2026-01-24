@@ -1,9 +1,9 @@
 ﻿{
   "applications": {
-    "SerieDB.HttpApi.Host": {
+    "SeriesDB.HttpApi.Host": {
       "type": "dotnet-project",
-      "launchUrl": "https://localhost:44314",
-      "path": "../../../src/SerieDB.HttpApi.Host/SerieDB.HttpApi.Host.csproj",
+      "launchUrl": "https://localhost:44345",
+      "path": "../../../src/SeriesDB.HttpApi.Host/SeriesDB.HttpApi.Host.csproj",
       "kubernetesService": ".*-httpapihost$",
       "healthCheckEndpoint": "/health-status",
       "healthUiEndpoint": "/health-ui",
@@ -11,7 +11,7 @@
         "order": 4
       }
     },
-    "SerieDB.Angular": {
+    "SeriesDB.Angular": {
       "type": "cli",
       "workingDirectory": "../../../angular",
       "startCommand": "./start.ps1",
@@ -23,7 +23,7 @@
     }
   },
   "containers": {
-    "serviceName": "SerieDB-Containers",
+    "serviceName": "SeriesDB-Containers",
   },
   "tasks":{
     "Initialize Solution":{
