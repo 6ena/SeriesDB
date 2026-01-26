@@ -1,4 +1,6 @@
-﻿using Volo.Abp.Application.Dtos;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 
@@ -13,8 +15,18 @@ namespace SeriesDB.Series
         CreateUpdateSerieDto>, // Update input
         ISerieAppService // Interface
     {
-        public SerieAppService(IRepository<Serie, int> repository) : base(repository)
+        private readonly ISeriesApiService _seriesApiService;
+        public SerieAppService(
+            IRepository<Serie, int> repository,
+            ISeriesApiService seriesApiService) 
+        : base(repository)
         {
+            _seriesApiService = seriesApiService;
+        }
+
+        public async Task<ICollection<SerieDto>> BuscarSerieAsync(string titulo, string genero = null)
+        {
+            return await _seriesApiService.BuscarSerieAsync(titulo, genero);
         }
     }
 }

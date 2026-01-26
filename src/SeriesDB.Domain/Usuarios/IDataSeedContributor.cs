@@ -25,7 +25,7 @@ public class SeriesDBDataSeederContributor
                 new Serie
                 {
                     Titulo = "Titulo Seed1",
-                    Genero = "Genero Seed1"
+                    Generos = "Generos Seed1"
                 },
                 autoSave: true
             );
@@ -34,7 +34,7 @@ public class SeriesDBDataSeederContributor
                 new Serie
                 {
                     Titulo = "Titulo Seed2",
-                    Genero = "Genero Seed2"
+                    Generos = "Generos Seed2"
                 },
                 autoSave: true
             );

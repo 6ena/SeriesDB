@@ -25,6 +25,8 @@ public class SeriesDBDbContext :
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
     public DbSet<Serie> Series { get; set; }
+    public DbSet<Temporada> Temporadas { get; set; }
+    public DbSet<Episodio> Episodios { get; set; }
     #region Entities from the modules
 
     /* Notice: We only implemented IIdentityProDbContext 
@@ -85,8 +87,73 @@ public class SeriesDBDbContext :
             b.ToTable(SeriesDBConsts.DbTablePrefix + "Series", SeriesDBConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
             b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
-            b.Property(x => x.Genero).HasMaxLength(128);
-            //...
+            b.Property(x => x.Generos).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Sinopsis).IsRequired().HasMaxLength(300);
+            b.Property(x => x.FechaEstreno).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Duracion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Clasificacion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Idiomas).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Directores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Escritores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Actores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Poster).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Pais).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ImdbId).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ImdbCalificacion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ImdbVotos).IsRequired(); // No HasMaxLength for int
+            b.Property(x => x.Tipo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.TotalTemporadas).IsRequired(); // No HasMaxLength for int
+
+            // Relación con Temporadas
+            b.HasMany(s => s.Temporadas)
+             .WithOne(t => t.Serie)
+             .HasForeignKey(t => t.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+
+        builder.Entity<Temporada>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Temporadas",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.FechaLanzamiento).IsRequired().HasMaxLength(128);
+            b.Property(x => x.NumeroTemporada).IsRequired();
+
+            // Relación con Serie
+            b.HasOne(t => t.Serie)
+             .WithMany(s => s.Temporadas)
+             .HasForeignKey(t => t.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+
+            // Relación con Episodios
+            b.HasMany(t => t.Episodios)
+             .WithOne(e => e.Temporada)
+             .HasForeignKey(e => e.TemporadaID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+
+        builder.Entity<Episodio>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Episodios",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.NroEpisodio).IsRequired();
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Duracion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Resumen).IsRequired().HasMaxLength(128);
+            b.Property(x => x.FechaEstreno).IsRequired();
+            b.Property(x => x.Directores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Escritores).IsRequired().HasMaxLength(128);
+
+            // Relación con Temporada
+            b.HasOne(e => e.Temporada)
+             .WithMany(t => t.Episodios)
+             .HasForeignKey(e => e.TemporadaID)
+             .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SeriesDB.Localization;
 using SeriesDB.MultiTenancy;
+using SeriesDB.Series;
 using System;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
@@ -43,7 +44,8 @@ public class SeriesDBDomainModule : AbpModule
             options.IsEnabled = MultiTenancyConsts.IsEnabled;
         });
 
-
+        // Register ISeriesApiService
+        context.Services.AddTransient<ISeriesApiService, OmdbService>();
 
 #if DEBUG
         context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());

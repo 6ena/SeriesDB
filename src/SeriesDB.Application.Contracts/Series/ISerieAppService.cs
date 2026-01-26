@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 
@@ -13,5 +14,6 @@ namespace SeriesDB.Series
         CreateUpdateSerieDto,
         CreateUpdateSerieDto> //used to create/update a Serie
     {
+        Task<ICollection<SerieDto>> BuscarSerieAsync(string titulo, string genero = null); //genero = null makes the parameter optional
     }
 }
