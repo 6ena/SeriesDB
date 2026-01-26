@@ -7,7 +7,7 @@ namespace SeriesDB.Series
 {
     public class TemporadaDto : EntityDto<int>
     {
-        public int NumeroTemporada { get; set; }
+        public int NroTemporada { get; set; }
         public string Titulo { get; set; }
         public DateOnly FechaLanzamiento { get; set; }
 
