@@ -7,6 +7,6 @@ namespace SeriesDB.Series
 {
     public interface ISeriesApiService
     {
-        Task<ICollection<SerieDto>> BuscarSerieAsync(string titulo, string genero);
+        Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero);
     }
 }

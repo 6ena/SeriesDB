@@ -119,7 +119,7 @@ public class SeriesDBDbContext :
             b.ConfigureByConvention(); //auto configure for the base class props
             b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
             b.Property(x => x.FechaLanzamiento).IsRequired().HasMaxLength(128);
-            b.Property(x => x.NumeroTemporada).IsRequired();
+            b.Property(x => x.NroTemporada).IsRequired();
 
             // Relación con Serie
             b.HasOne(t => t.Serie)

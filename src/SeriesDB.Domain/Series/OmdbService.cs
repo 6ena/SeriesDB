@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SeriesDB.Series;
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -13,122 +15,132 @@ namespace SeriesDB.Series
 {
     public class OmdbService : ISeriesApiService
     {
-        private static readonly string apiKey = "39e61792"; // Reemplaza con tu clave API de OMDb.
-        private static readonly string baseUrl = "http://www.omdbapi.com/";
+        private const string apiKey = "39e61792"; // Reemplaza con tu clave API de OMDb.
+        private const string baseUrl = "http://www.omdbapi.com/";
 
-        public async Task<ICollection<SerieDto>> BuscarSerieAsync(string titulo, string genero)
+        // Método principal de búsqueda que controla la lógica de validación
+        public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
         {
-            using HttpClient client = new HttpClient();
-
-            List<SerieDto> series = new List<SerieDto>();
-
-            string url = $"{baseUrl}?s={titulo}&apikey={apiKey}&type=series";
-
-            try
+            if (string.IsNullOrWhiteSpace(titulo))
             {
+                throw new ArgumentException("Se requiere titulo para la búsqueda.", nameof(titulo));
+            }
+
+            if (!string.IsNullOrWhiteSpace(titulo) && string.IsNullOrWhiteSpace(genero))
+            {
+                return await BuscarSeriePorTituloAsync(titulo);
+            }
+
+            if (!string.IsNullOrWhiteSpace(titulo) && !string.IsNullOrWhiteSpace(genero))
+            {
+                return await BuscarSeriePorTituloYGeneroAsync(titulo, genero);
+            }
+
+            throw new ArgumentException("No es posible buscar solo por género, titulo es obligatorio.");
+        }
+
+
+        // Busquedas
+        private async Task<SerieDto[]> BuscarSeriePorTituloAsync(string titulo)
+        {
+            var url = $"{baseUrl}?apikey={apiKey}&s={titulo}&type=series";
+            return await GetSeriesAsync(url);
+        }
+
+        // Filtrar series por genero después de obtener los resultados por título
+        private async Task<SerieDto[]> BuscarSeriePorTituloYGeneroAsync(string titulo, string genero)
+        {
+            var url = $"{baseUrl}?apikey={apiKey}&s={titulo}&type=series";
+            var series = await GetSeriesAsync(url);
+
+            var seriesFiltradas = new List<SerieDto>();
+            foreach (var serie in series)
+            {
+                if (serie.Generos != null && serie.Generos.Contains(genero, StringComparison.OrdinalIgnoreCase))
+                {
+                    seriesFiltradas.Add(serie);
+                }
+            }
+            return seriesFiltradas.ToArray();
+        }
+
+
+        // Método para obtener las series con sus detalles completos, usando sus Id de IMDb
+        private async Task<SerieDto[]> GetSeriesAsync(string url)
+        {
+
+            using HttpClient client = new HttpClient();
+            {
+
                 // Hacer la solicitud HTTP y obtener la respuesta como string
                 var response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
 
-                string jsonResponse = await response.Content.ReadAsStringAsync();
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var json = JObject.Parse(jsonResponse);
 
-                // Deserializar la respuesta JSON a un objeto SearchResponse
-                var searchResponse = JsonConvert.DeserializeObject<SearchResponse>(jsonResponse);
-
-                // Retornar la lista de series si existen
-                var seriesOmdb = searchResponse?.Search ?? new List<SerieOmdb>();
-
-                foreach (var serieOmdb in seriesOmdb)
+                if (json["Response"]?.ToString() == "False")
                 {
-                    series.Add(new SerieDto
-                    {
-                        Titulo = serieOmdb.Title,
-                        //Generos = serieOmdb.Genre,
-                        //Sinopsis = serieOmdb.Plot,
-                        FechaEstreno = serieOmdb.Released,
-                        //Duracion = serieOmdb.Runtime,
-                        //Clasificacion = serieOmdb.Rated,
-                        //Idiomas = serieOmdb.Language,
-                        //Directores = serieOmdb.Director,
-                        //Escritores = serieOmdb.Writer,
-                        //Actores = serieOmdb.Actors,
-                        Poster = serieOmdb.Poster,
-                        //Pais = serieOmdb.Country,
-                        ImdbId = serieOmdb.ImdbID,
-                        //ImdbCalificacion = serieOmdb.ImdbRating,
-                        //ImdbVotos = serieOmdb.ImdbVotes,
-                        Tipo = serieOmdb.Type,
-                        //TotalTemporadas = serieOmdb.totalSeasons,
-                    });
+                    return Array.Empty<SerieDto>();
                 }
 
-                return series;
+                var seriesJson = json["Search"];
+                if (seriesJson == null)
+                {
+                    return Array.Empty<SerieDto>();
+                }
+
+                var seriesLista = new List<SerieDto>();
+                foreach (var serie in seriesJson)
+                {
+                    var serieId = serie["imdbID"]?.ToString();
+                    var serieDetalles = await GetDetallesSerieAsync(serieId);
+
+                    if (serieDetalles != null)
+                    {
+                        seriesLista.Add(serieDetalles);
+                    }
+                }
+
+                return seriesLista.ToArray();
             }
-            catch (HttpRequestException e)
+        }
+
+
+        private async Task<SerieDto> GetDetallesSerieAsync(string imdbId)
+        {
+            var url = $"{baseUrl}?apikey={apiKey}&i={imdbId}";
+
+            using HttpClient client = new HttpClient();
             {
-                throw new Exception("Se ha producido un error en la búsqueda de la serie", e);
+                 // Hacer la solicitud HTTP y obtener la respuesta como string
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var json = JObject.Parse(jsonResponse);
+
+                return new SerieDto
+                {
+                    Titulo = json["Title"]?.ToString(),
+                    Clasificacion = json["Rated"]?.ToString(),
+                    FechaEstreno = json["Released"]?.ToString(),
+                    Duracion = json["Runtime"]?.ToString(),
+                    Generos = json["Genre"]?.ToString(),
+                    Directores = json["Director"]?.ToString(),
+                    Escritores = json["Writer"]?.ToString(),
+                    Actores = json["Actors"]?.ToString(),
+                    Sinopsis = json["Plot"]?.ToString(),
+                    Idiomas = json["Language"]?.ToString(),
+                    Pais = json["Country"]?.ToString(),
+                    Poster = json["Poster"]?.ToString(),
+                    ImdbId = imdbId,
+                    ImdbCalificacion = json["imdbRating"]?.ToString(),
+                    ImdbVotos = int.TryParse(json["imdbVotes"]?.ToString().Replace(",", ""), out var votes) ? votes : 0,
+                    Tipo = json["Type"]?.ToString(),
+                    TotalTemporadas = int.TryParse(json["totalSeasons"]?.ToString(), out var seasons) ? seasons : 0
+                };
             }
-        }
-
-        private class SearchResponse
-        {
-            [JsonProperty("Search")]
-            public List<SerieOmdb> Search { get; set; }
-        }
-
-        private class SerieOmdb
-        {
-            [JsonProperty("Title")]
-            public string Title { get; set; }
-            /*
-            [JsonProperty("Genre")]
-            public string Genre { get; set; }
-
-            [JsonProperty("Plot")]
-            public string Plot { get; set; }
-            */
-            [JsonProperty("Released")]
-            public string Released { get; set; }
-            /*
-            [JsonProperty("Runtime")]
-            public string Runtime { get; set; }
-
-            [JsonProperty("Rated")]
-            public string Rated { get; set; }
-
-            [JsonProperty("Language")]
-            public string Language { get; set; }
-
-            [JsonProperty("Director")]
-            public string Director { get; set; }
-
-            [JsonProperty("Writer")]
-            public string Writer { get; set; }
-
-            [JsonProperty("Actors")]
-            public string Actors { get; set; }
-            */
-            [JsonProperty("Poster")]
-            public string Poster { get; set; }
-            /*
-            [JsonProperty("Country")]
-            public string Country { get; set; }
-            */
-            [JsonProperty("imdbID")]
-            public string ImdbID { get; set; }
-            /*
-            [JsonProperty("imdbRating")]
-            public string ImdbRating { get; set; }
-
-            [JsonProperty("imdbVotes")]
-            public int ImdbVotes { get; set; }
-            */
-            [JsonProperty("Type")]
-            public string Type { get; set; }
-            /*
-            [JsonProperty("totalSeasons")]
-            public int totalSeasons {get; set;}
-            */
         }
     }
 }

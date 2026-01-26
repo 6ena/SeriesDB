@@ -24,7 +24,7 @@ namespace SeriesDB.Series
             _seriesApiService = seriesApiService;
         }
 
-        public async Task<ICollection<SerieDto>> BuscarSerieAsync(string titulo, string genero = null)
+        public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
         {
             return await _seriesApiService.BuscarSerieAsync(titulo, genero);
         }
