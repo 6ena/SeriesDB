@@ -14,9 +14,11 @@ namespace SeriesDB
 
             // Temporada mappings
             CreateMap<Temporada, TemporadaDto>();
+            CreateMap<TemporadaDto, Temporada>();
 
             // Episodio mappings
             CreateMap<Episodio, EpisodioDto>();
+            CreateMap<EpisodioDto, Episodio>();
         }
     }
 }
