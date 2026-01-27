@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using SeriesDB.ListasDeSeguimiento;
+using SeriesDB.Series;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -9,10 +11,9 @@ using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.OpenIddict.EntityFrameworkCore;
-using SeriesDB.Series;
 
 namespace SeriesDB.EntityFrameworkCore;
 
@@ -27,6 +28,7 @@ public class SeriesDBDbContext :
     public DbSet<Serie> Series { get; set; }
     public DbSet<Temporada> Temporadas { get; set; }
     public DbSet<Episodio> Episodios { get; set; }
+    public DbSet<ListaDeSeguimiento> ListasDeSeguimiento { get; set; }
     #region Entities from the modules
 
     /* Notice: We only implemented IIdentityProDbContext 
@@ -155,5 +157,25 @@ public class SeriesDBDbContext :
              .HasForeignKey(e => e.TemporadaID)
              .OnDelete(DeleteBehavior.Cascade);
         });
+
+        builder.Entity<ListaDeSeguimiento>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "ListasDeSeguimiento",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.FechaModificacion).IsRequired();
+             
+            // Relación con Serie
+            b.HasMany(ls => ls.Series)
+             .WithOne();
+
+            // Relación con el Usuario (IdentityUser)
+            b.HasOne<IdentityUser>()
+             .WithMany()
+             .HasForeignKey(u => u.UsuarioId)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+
     }
 }
