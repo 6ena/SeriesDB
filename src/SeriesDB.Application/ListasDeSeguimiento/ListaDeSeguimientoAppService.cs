@@ -37,7 +37,7 @@ namespace SeriesDB.ListasDeSeguimiento
 
             // Cargar la lista con la colección de Series incluida
             var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
-            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.UsuarioId == userId);
+            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.IdUsuario == userId);
 
             // Si no existe, devolver array vacío en lugar de lanzar excepción
             if (listaDeSeguimiento == null)
@@ -56,13 +56,13 @@ namespace SeriesDB.ListasDeSeguimiento
 
             // Cargar la lista con la colección de series incluida
             var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
-            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.UsuarioId == userId);
+            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.IdUsuario == userId);
 
             if (listaDeSeguimiento == null)
             {
                 listaDeSeguimiento = new ListaDeSeguimiento()
                 {
-                    UsuarioId = userId,
+                    IdUsuario = userId,
                     FechaModificacion = DateOnly.FromDateTime(DateTime.Now),
                 };
                 await _listaDeSeguimientoRepository.InsertAsync(listaDeSeguimiento);
@@ -103,7 +103,7 @@ namespace SeriesDB.ListasDeSeguimiento
 
             // Cargar la lista con la colección de Series incluida
             var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
-            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.UsuarioId == userId);
+            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.IdUsuario == userId);
 
             if (listaDeSeguimiento == null)
             {
@@ -130,7 +130,7 @@ namespace SeriesDB.ListasDeSeguimiento
 
             // Cargar la lista con la colección de Series incluida
             var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
-            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.UsuarioId == userId);
+            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.IdUsuario == userId);
 
             if (listaDeSeguimiento == null)
             {
@@ -151,12 +151,23 @@ namespace SeriesDB.ListasDeSeguimiento
 
         public async Task<SerieDto[]> BuscarSeriesDeListaAsync(string titulo, string genero = null)
         {
-            var seriesLista = await _serieRepository.GetListAsync();
+            //Hay que estar logueado 
+            Guid userId = (Guid)_currentUser.Id;
+
+            //Lista con la colección de Series seguidas
+            var queryable = await _listaDeSeguimientoRepository.WithDetailsAsync(x => x.Series);
+            var listaDeSeguimiento = queryable.FirstOrDefault(l => l.IdUsuario == userId);
+
+            if (listaDeSeguimiento == null)
+            {
+                return Array.Empty<SerieDto>();
+            }
+
             var seriesListaEncontradas = new List<SerieDto>();
 
             if (!string.IsNullOrWhiteSpace(titulo) && string.IsNullOrWhiteSpace(genero))
             {
-                foreach (var serie in seriesLista)
+                foreach (var serie in listaDeSeguimiento.Series)
                 {
                     if (serie.Titulo != null && serie.Titulo.Contains(titulo, StringComparison.OrdinalIgnoreCase))
                     {
@@ -167,7 +178,7 @@ namespace SeriesDB.ListasDeSeguimiento
 
             if (string.IsNullOrWhiteSpace(titulo) && !string.IsNullOrWhiteSpace(genero))
             {
-                foreach (var serie in seriesLista)
+                foreach (var serie in listaDeSeguimiento.Series)
                 {
                     if (serie.Generos != null && serie.Generos.Contains(genero, StringComparison.OrdinalIgnoreCase))
                     {
@@ -178,7 +189,7 @@ namespace SeriesDB.ListasDeSeguimiento
 
             if (!string.IsNullOrWhiteSpace(titulo) && !string.IsNullOrWhiteSpace(genero))
             {
-                foreach (var serie in seriesLista)
+                foreach (var serie in listaDeSeguimiento.Series)
                 {
                     if (serie.Titulo != null && serie.Generos != null &&
                         serie.Titulo.Contains(titulo, StringComparison.OrdinalIgnoreCase) &&
@@ -190,7 +201,6 @@ namespace SeriesDB.ListasDeSeguimiento
             }
 
             return seriesListaEncontradas.ToArray();
-            //ObjectMapper.Map<List<Serie>, SerieDto[]>(seriesLista);
         }
 
     }
