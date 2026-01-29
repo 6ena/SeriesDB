@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using SeriesDB.Domain.Notificaciones;
 using SeriesDB.ListasDeSeguimiento;
 using SeriesDB.Series;
+using System.Collections.Generic;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -14,6 +16,7 @@ using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
+
 
 namespace SeriesDB.EntityFrameworkCore;
 
@@ -29,6 +32,7 @@ public class SeriesDBDbContext :
     public DbSet<Temporada> Temporadas { get; set; }
     public DbSet<Episodio> Episodios { get; set; }
     public DbSet<ListaDeSeguimiento> ListasDeSeguimiento { get; set; }
+    public DbSet<Notificacion> Notificaciones { get; set; }
     #region Entities from the modules
 
     /* Notice: We only implemented IIdentityProDbContext 
@@ -74,7 +78,7 @@ public class SeriesDBDbContext :
         builder.ConfigureIdentity();
         builder.ConfigureOpenIddict();
         builder.ConfigureBlobStoring();
-        
+
         /* Configure your own tables/entities inside here */
 
         //builder.Entity<YourEntity>(b =>
@@ -164,18 +168,35 @@ public class SeriesDBDbContext :
                 SeriesDBConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
             b.Property(x => x.FechaModificacion).IsRequired();
-             
-            // Relación con Serie
+
+            // Relación con Serie. Tabla intermedia ListaSeguimientoSerie para la relación muchos a muchos
             b.HasMany(ls => ls.Series)
-             .WithOne();
+             .WithMany()
+             .UsingEntity<Dictionary<string, object>>( //Tabla intermedia para seguir las series de cada lista
+                "ListaSeguimientoSerie",  // Nombre de la tabla intermedia
+                j => j.HasOne<Serie>().WithMany().HasForeignKey("SerieId").OnDelete(DeleteBehavior.Cascade),
+                j => j.HasOne<ListaDeSeguimiento>().WithMany().HasForeignKey("ListaDeSeguimientoId").OnDelete(DeleteBehavior.Cascade)
+             );
 
             // Relación con el Usuario (IdentityUser)
             b.HasOne<IdentityUser>()
              .WithMany()
-             .HasForeignKey(u => u.UsuarioId)
+             .HasForeignKey(u => u.IdUsuario)
              .OnDelete(DeleteBehavior.Cascade)
              .IsRequired();
         });
 
+        builder.Entity<Notificacion>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Notificacion",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.IdUsuario).IsRequired();
+            b.Property(x => x.Titulo).IsRequired();
+            b.Property(x => x.Mensaje).IsRequired();
+            b.Property(x => x.Leida).IsRequired();
+            b.Property(x => x.Tipo).IsRequired();
+            b.Property(x => x.FechaCreacion).IsRequired();
+        });
     }
 }

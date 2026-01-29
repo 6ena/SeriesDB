@@ -47,6 +47,9 @@ public class SeriesDBDomainModule : AbpModule
         // Register ISeriesApiService
         context.Services.AddTransient<ISeriesApiService, OmdbService>();
 
+        // Register ISerieUpdateService
+        context.Services.AddTransient<ISerieUpdateService, SerieUpdateService>();
+
 #if DEBUG
         context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
 #endif

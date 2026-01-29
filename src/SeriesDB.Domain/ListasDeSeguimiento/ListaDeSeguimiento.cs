@@ -14,6 +14,6 @@ namespace SeriesDB.ListasDeSeguimiento //corresponde a Watchlist, en el repo del
         public DateOnly FechaModificacion { get; set; }
 
         //Usuario
-        public Guid UsuarioId { get; set; }
+        public Guid IdUsuario { get; set; }
     }
 }

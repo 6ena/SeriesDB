@@ -142,5 +142,88 @@ namespace SeriesDB.Series
                 };
             }
         }
+
+        public async Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int nroTemporada)
+        {
+            var url = $"{baseUrl}?apikey={apiKey}&i={imdbId}&season={nroTemporada}";
+
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var json = JObject.Parse(jsonResponse);
+
+                if (json["Response"]?.ToString() == "False")
+                {
+                    return null;
+                }
+
+                var episodiosJson = json["Episodes"];
+                if (episodiosJson == null)
+                {
+                    return null;
+                }
+
+                var episodiosList = new List<EpisodioDto>();
+                foreach (var episodio in episodiosJson)
+                {
+                    episodiosList.Add(new EpisodioDto
+                    {
+                        Titulo = episodio["Title"]?.ToString(),
+                        NroEpisodio = int.TryParse(episodio["Episode"]?.ToString(), out var episodioNum) ? episodioNum : 0,
+                        FechaEstreno = DateOnly.TryParse(episodio["Released"]?.ToString(), out var fecha) ? fecha : DateOnly.MinValue
+                    });
+                }
+
+                return new TemporadaDto
+                {
+                    Titulo = json["Title"]?.ToString(),
+                    NroTemporada = int.TryParse(json["Season"]?.ToString(), out var seasonNumber) ? seasonNumber : 0,
+                    Episodios = episodiosList
+                };
+            }
+        }
+
+        public async Task<SerieDto> BuscarSerieUpdateAsync(string imdbId)
+        {
+            var url = $"{baseUrl}?apikey={apiKey}&i={imdbId}&type=series";
+            
+            using HttpClient client = new HttpClient();
+            {
+                var response = await client.GetAsync(url);
+                
+                if (!response.IsSuccessStatusCode)
+                    return null;
+                    
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var json = JObject.Parse(jsonResponse);
+                
+                if (json["Response"]?.ToString() == "False")
+                    return null;
+                
+                return new SerieDto
+                {
+                    Titulo = json["Title"]?.ToString(),
+                    Clasificacion = json["Rated"]?.ToString(),
+                    FechaEstreno = json["Released"]?.ToString(),
+                    Duracion = json["Runtime"]?.ToString(),
+                    Generos = json["Genre"]?.ToString(),
+                    Directores = json["Director"]?.ToString(),
+                    Escritores = json["Writer"]?.ToString(),
+                    Actores = json["Actors"]?.ToString(),
+                    Sinopsis = json["Plot"]?.ToString(),
+                    Idiomas = json["Language"]?.ToString(),
+                    Pais = json["Country"]?.ToString(),
+                    Poster = json["Poster"]?.ToString(),
+                    ImdbId = imdbId,
+                    ImdbCalificacion = json["imdbRating"]?.ToString(),
+                    ImdbVotos = int.TryParse(json["imdbVotes"]?.ToString().Replace(",", ""), out var votes) ? votes : 0,
+                    Tipo = json["Type"]?.ToString(),
+                    TotalTemporadas = int.TryParse(json["totalSeasons"]?.ToString(), out var seasons) ? seasons : 0
+                };
+            }
+        }
     }
 }

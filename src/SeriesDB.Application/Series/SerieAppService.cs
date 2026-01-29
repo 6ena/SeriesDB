@@ -39,6 +39,11 @@ namespace SeriesDB.Series
             return await _seriesApiService.BuscarSerieAsync(titulo, genero);
         }
 
+        public async Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int nroTemporada)
+        {
+            return await _seriesApiService.BuscarTemporadaAsync(imdbId, nroTemporada);
+        }
+
 
         private Serie MapSerieDtoToSerie(SerieDto serieDto)
         {

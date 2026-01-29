@@ -15,6 +15,8 @@ namespace SeriesDB.Series
         CreateUpdateSerieDto> //used to create/update a Serie
     {
         Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null); //genero = null makes the parameter optional
+        Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int nroTemporada);
         Task PersistirSerieAsync(SerieDto serieDto);
+
     }
 }
