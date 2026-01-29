@@ -1,10 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using SeriesDB.Localization;
-using SeriesDB.MultiTenancy;
-using SeriesDB.Series;
 using System;
-using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.PermissionManagement.Identity;
@@ -18,6 +14,10 @@ using Volo.Abp.BackgroundJobs;
 using Volo.Abp.Emailing;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
+//seriesDB
+using SeriesDB.Series;
+using SeriesDB.Usuarios;
+using SeriesDB.MultiTenancy;
 
 namespace SeriesDB;
 
@@ -49,6 +49,9 @@ public class SeriesDBDomainModule : AbpModule
 
         // Register ISerieUpdateService
         context.Services.AddTransient<ISerieUpdateService, SerieUpdateService>();
+
+        // Register ICurrentUserService
+        context.Services.AddTransient<ICurrentUserService, CurrentUserService>();
 
 #if DEBUG
         context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());

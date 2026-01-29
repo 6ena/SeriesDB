@@ -1,7 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using SeriesDB.Domain.Notificaciones;
-using SeriesDB.ListasDeSeguimiento;
-using SeriesDB.Series;
 using System.Collections.Generic;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -16,6 +13,10 @@ using Volo.Abp.Identity.EntityFrameworkCore;
 using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
+//SeriesDB
+using SeriesDB.Series;
+using SeriesDB.ListasDeSeguimiento;
+using SeriesDB.Domain.Notificaciones;
 
 
 namespace SeriesDB.EntityFrameworkCore;
@@ -88,6 +89,7 @@ public class SeriesDBDbContext :
         //    //...
         //});
 
+
         builder.Entity<Serie>(b =>
         {
             b.ToTable(SeriesDBConsts.DbTablePrefix + "Series", SeriesDBConsts.DbSchema);
@@ -116,7 +118,15 @@ public class SeriesDBDbContext :
              .HasForeignKey(t => t.SerieID)
              .OnDelete(DeleteBehavior.Cascade)
              .IsRequired();
+
+            // Relación con Calificaciones
+            b.HasMany(s => s.Calificaciones)
+             .WithOne(c => c.Serie)
+             .HasForeignKey(c => c.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
         });
+
 
         builder.Entity<Temporada>(b =>
         {
@@ -142,6 +152,7 @@ public class SeriesDBDbContext :
              .IsRequired();
         });
 
+
         builder.Entity<Episodio>(b =>
         {
             b.ToTable(SeriesDBConsts.DbTablePrefix + "Episodios",
@@ -159,8 +170,10 @@ public class SeriesDBDbContext :
             b.HasOne(e => e.Temporada)
              .WithMany(t => t.Episodios)
              .HasForeignKey(e => e.TemporadaID)
-             .OnDelete(DeleteBehavior.Cascade);
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
         });
+
 
         builder.Entity<ListaDeSeguimiento>(b =>
         {
@@ -172,7 +185,7 @@ public class SeriesDBDbContext :
             // Relación con Serie. Tabla intermedia ListaSeguimientoSerie para la relación muchos a muchos
             b.HasMany(ls => ls.Series)
              .WithMany()
-             .UsingEntity<Dictionary<string, object>>( //Tabla intermedia para seguir las series de cada lista
+             .UsingEntity<Dictionary<string, object>>( // Tabla intermedia para seguir las series de cada lista
                 "ListaSeguimientoSerie",  // Nombre de la tabla intermedia
                 j => j.HasOne<Serie>().WithMany().HasForeignKey("SerieId").OnDelete(DeleteBehavior.Cascade),
                 j => j.HasOne<ListaDeSeguimiento>().WithMany().HasForeignKey("ListaDeSeguimientoId").OnDelete(DeleteBehavior.Cascade)
@@ -180,23 +193,57 @@ public class SeriesDBDbContext :
 
             // Relación con el Usuario (IdentityUser)
             b.HasOne<IdentityUser>()
-             .WithMany()
-             .HasForeignKey(u => u.IdUsuario)
+             .WithOne()
+             .HasForeignKey<ListaDeSeguimiento>(u => u.IdUsuario)
              .OnDelete(DeleteBehavior.Cascade)
              .IsRequired();
+            b.HasIndex(u => u.IdUsuario).IsUnique(); // Para garantizar un solo registro por usuario
         });
+
 
         builder.Entity<Notificacion>(b =>
         {
             b.ToTable(SeriesDBConsts.DbTablePrefix + "Notificacion",
                 SeriesDBConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
-            b.Property(x => x.IdUsuario).IsRequired();
             b.Property(x => x.Titulo).IsRequired();
             b.Property(x => x.Mensaje).IsRequired();
             b.Property(x => x.Leida).IsRequired();
             b.Property(x => x.Tipo).IsRequired();
             b.Property(x => x.FechaCreacion).IsRequired();
+
+            // Relación con el Usuario (IdentityUser)
+            b.HasOne<IdentityUser>()
+            .WithMany()
+            .HasForeignKey(n => n.IdUsuario)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+        });
+        
+
+
+        builder.Entity<Calificacion>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Calificacion",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.NroCalificacion).IsRequired();
+            b.Property(x => x.Comentario);
+            b.Property(x => x.FechaCreacion).IsRequired();
+
+            // Relación con Serie
+            b.HasOne(c => c.Serie)
+             .WithMany(s => s.Calificaciones)
+             .HasForeignKey(c => c.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+
+            // Relación con el Usuario (IdentityUser)
+            b.HasOne<IdentityUser>()
+             .WithMany()
+             .HasForeignKey(c => c.IdUsuario)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
         });
     }
 }

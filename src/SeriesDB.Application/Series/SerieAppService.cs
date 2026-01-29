@@ -1,10 +1,12 @@
-﻿
+﻿using Microsoft.Extensions.Logging;
+using SeriesDB.Usuarios;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.ObjectMapping;
 
@@ -22,16 +24,19 @@ namespace SeriesDB.Series
         private readonly ISeriesApiService _seriesApiService;
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly IObjectMapper _objectMapper;
+        private readonly ICurrentUserService _currentUserService;
 
         public SerieAppService(
             IRepository<Serie, int> repository,
             ISeriesApiService seriesApiService,
-            IObjectMapper objectMapper)
+            IObjectMapper objectMapper,
+            ICurrentUserService currentUserService)
         : base(repository)
         {
             _seriesApiService = seriesApiService;
             _serieRepository = repository;
             _objectMapper = objectMapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
@@ -86,33 +91,123 @@ namespace SeriesDB.Series
 
         public async Task PersistirSerieAsync(SerieDto serieDto)
         {
-                var seriesExistentes = await _serieRepository.GetListAsync();
+            var seriesExistentes = await _serieRepository.GetListAsync();
 
-                if (seriesExistentes == null)
+            if (seriesExistentes == null)
+            {
+                seriesExistentes = new List<Serie>();
+            }
+
+            var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbId == serieDto.ImdbId);
+
+            if (serieExistente == null)
+            {
+                var nuevaSerie = MapSerieDtoToSerie(serieDto);
+                await _serieRepository.InsertAsync(nuevaSerie);
+            }
+            else
+            {
+                if (serieExistente.TotalTemporadas == serieDto.TotalTemporadas)
                 {
-                    seriesExistentes = new List<Serie>();
-                }
-
-                var serieExistente = seriesExistentes.FirstOrDefault(s => s.ImdbId == serieDto.ImdbId);
-
-                if (serieExistente == null)
-                {
-                    var nuevaSerie = MapSerieDtoToSerie(serieDto);
-                    await _serieRepository.InsertAsync(nuevaSerie);
+                    throw new InvalidOperationException("Serie ya esta persistida");
                 }
                 else
                 {
-                    if (serieExistente.TotalTemporadas == serieDto.TotalTemporadas)
-                    {
-                        throw new InvalidOperationException("Serie ya esta persistida");
-                    }
-                    else
-                    {
-                        serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
-                        UpdateTemporadas(serieExistente, serieDto.Temporadas.ToList());
-                        await _serieRepository.UpdateAsync(serieExistente);
-                    }
+                    serieExistente.TotalTemporadas = serieDto.TotalTemporadas;
+                    UpdateTemporadas(serieExistente, serieDto.Temporadas.ToList());
+                    await _serieRepository.UpdateAsync(serieExistente);
                 }
+            }
         }
+
+
+        public async Task CalificarSerieAsync(CalificacionDto input)
+        {
+            try
+            {
+                // Load the serie WITH its Calificaciones collection using ABP repository methods
+                var queryable = await _serieRepository.WithDetailsAsync(s => s.Calificaciones);
+                var serie = queryable.FirstOrDefault(s => s.Id == input.SerieID);
+
+                if (serie == null)
+                {
+                    throw new EntityNotFoundException(typeof(Serie), input.SerieID);
+                }
+
+                var userIdActual = _currentUserService.GetCurrentUserId();
+                if (!userIdActual.HasValue)
+                {
+                    throw new InvalidOperationException("User ID cannot be null");
+                }
+
+                var calificacionExistente = serie.Calificaciones.FirstOrDefault(c => c.IdUsuario == userIdActual.Value);
+                if (calificacionExistente != null)
+                {
+                    throw new InvalidOperationException("Ya has calificado esta serie.");
+                }
+
+                var calificacion = new Calificacion
+                {
+                    NroCalificacion = input.NroCalificacion,
+                    Comentario = input.Comentario,
+                    FechaCreacion = DateTime.Now,
+                    SerieID = input.SerieID,
+                    IdUsuario = userIdActual.Value
+                };
+
+                serie.Calificaciones.Add(calificacion);
+                await _serieRepository.UpdateAsync(serie);
+                Logger.LogInformation("Serie calificada correctamente.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al calificar la serie.");
+                throw;
+            }
+        }
+
+
+        public async Task ModificarCalificacionAsync(CalificacionDto input)
+        {
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            try
+            {
+                var queryable = await _serieRepository.WithDetailsAsync(s => s.Calificaciones);
+                var serie = queryable.FirstOrDefault(s => s.Id == input.SerieID);
+                if (serie == null)
+                {
+                    throw new EntityNotFoundException(typeof(Serie), input.SerieID);
+                }
+
+                var userIdActual = _currentUserService.GetCurrentUserId();
+                if (!userIdActual.HasValue)
+                {
+                    throw new InvalidOperationException("User ID cannot be null");
+                }
+
+                var calificacionExistente = serie.Calificaciones.FirstOrDefault(c => c.IdUsuario == userIdActual.Value);
+                if (calificacionExistente == null)
+                {
+                    throw new InvalidOperationException("No hay calificación que modificar.");
+                }
+
+                calificacionExistente.NroCalificacion = input.NroCalificacion;
+                calificacionExistente.Comentario = input.Comentario;
+                calificacionExistente.FechaCreacion = DateTime.Now;
+
+                await _serieRepository.UpdateAsync(serie);
+                Logger.LogInformation("Calificación modificada correctamente.");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error al modificar la calificación.");
+                throw;
+            }
+        }
+
     }
 }
