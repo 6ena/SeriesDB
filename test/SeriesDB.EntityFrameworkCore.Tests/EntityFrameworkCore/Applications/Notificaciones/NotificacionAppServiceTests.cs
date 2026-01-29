@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
+using Volo.Abp.Identity;
 using Volo.Abp.Modularity;
 using Xunit;
 
@@ -25,15 +26,31 @@ namespace SeriesDB.Tests.Notificaciones
             _dbContext = GetRequiredService<SeriesDBDbContext>();
         }
 
-        /// <summary>
-        /// Verifica que el método <c>MostrarNotificacionesPantalla</c> retorne una lista de notificaciones no vacía
-        /// cuando se llama con un usuario que tiene notificaciones no leídas.
-        /// </summary>
+
+        // Método helper para crear usuarios de prueba
+        private async Task<Guid> CreateTestUserAsync(Guid? userId = null)
+        {
+            var id = userId ?? Guid.NewGuid();
+            var testUser = new IdentityUser(
+                id,
+                $"testuser_{id:N}",
+                $"test_{id:N}@example.com"
+            );
+            
+            await _dbContext.Users.AddAsync(testUser);
+            await _dbContext.SaveChangesAsync();
+            
+            return id;
+        }
+
+
+        // Verifica que el método <c>MostrarNotificacionesPantalla</c> retorne una lista de notificaciones no vacía
+        // cuando se llama con un usuario que tiene notificaciones no leídas.
         [Fact]
         public async Task MostrarNotificacionesPantalla_Should_Return_Unread_Notifications()
         {
             // Arrange
-            var idUsuario = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var idUsuario = await CreateTestUserAsync(Guid.Parse("00000000-0000-0000-0000-000000000001"));
             
             // Seed test notifications
             await _dbContext.Notificaciones.AddRangeAsync(
@@ -67,14 +84,13 @@ namespace SeriesDB.Tests.Notificaciones
             notificacionesDto.Count.ShouldBeGreaterThanOrEqualTo(2);
         }
 
-        /// <summary>
-        /// Verifica que el método <c>CrearYEnviarNotificacionAsync</c> cree y envíe una notificación correctamente.
-        /// </summary>
+
+        // Verifica que el método <c>CrearYEnviarNotificacionAsync</c> cree y envíe una notificación correctamente.
         [Fact]
         public async Task CrearYEnviarNotificacionAsync_Should_Create_And_Send_Notification()
         {
             // Arrange
-            var idUsuario = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var idUsuario = await CreateTestUserAsync(Guid.Parse("00000000-0000-0000-0000-000000000002"));
             var titulo = "Nuevo Titulo";
             var mensaje = "Nuevo Mensaje";
             var tipo = TipoNotificacion.Email;

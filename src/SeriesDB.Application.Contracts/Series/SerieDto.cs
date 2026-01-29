@@ -24,5 +24,6 @@ namespace SeriesDB.Series
         public int TotalTemporadas { get; set; }
 
         public ICollection<TemporadaDto> Temporadas { get; set; }
+        public ICollection<CalificacionDto> Calificaciones { get; set; }
     }
 }

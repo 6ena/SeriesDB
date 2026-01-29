@@ -25,6 +25,11 @@ namespace SeriesDB.Series
         public string Tipo { get; set; }
         public int TotalTemporadas { get; set; }
         public ICollection<Temporada> Temporadas { get; set; }
+        public ICollection<Calificacion> Calificaciones { get; set; }
 
+        public Serie()
+        {
+            Calificaciones = new List<Calificacion>();
+        }
     }
 }
