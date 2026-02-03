@@ -25,28 +25,59 @@ namespace SeriesDB.Series
         private readonly IRepository<Serie, int> _serieRepository;
         private readonly IObjectMapper _objectMapper;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IMonitoreoApiAppService _monitoreoApiAppService;
 
         public SerieAppService(
             IRepository<Serie, int> repository,
             ISeriesApiService seriesApiService,
             IObjectMapper objectMapper,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            IMonitoreoApiAppService monitoreoApiAppService)
         : base(repository)
         {
             _seriesApiService = seriesApiService;
             _serieRepository = repository;
             _objectMapper = objectMapper;
             _currentUserService = currentUserService;
+            _monitoreoApiAppService = monitoreoApiAppService;
         }
 
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
         {
-            return await _seriesApiService.BuscarSerieAsync(titulo, genero);
+            var monitoreo = await _monitoreoApiAppService.IniciarMonitoreo();
+            try
+
+            {
+                var serie = await _seriesApiService.BuscarSerieAsync(titulo, genero);
+                monitoreo = await _monitoreoApiAppService.FinalizarMonitoreo(monitoreo);
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                return serie;
+            }
+            catch (Exception ex)
+            {
+                monitoreo = await _monitoreoApiAppService.ErrorMonitoreo(monitoreo, ex.Message);
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                throw;
+            }
         }
 
         public async Task<TemporadaDto> BuscarTemporadaAsync(string imdbId, int nroTemporada)
         {
-            return await _seriesApiService.BuscarTemporadaAsync(imdbId, nroTemporada);
+            var monitoreo = await _monitoreoApiAppService.IniciarMonitoreo();
+
+            try
+            {
+                var temporada = await _seriesApiService.BuscarTemporadaAsync(imdbId, nroTemporada);
+                monitoreo = await _monitoreoApiAppService.FinalizarMonitoreo(monitoreo);
+                return await _seriesApiService.BuscarTemporadaAsync(imdbId, nroTemporada);
+                return temporada;
+            }
+            catch (Exception ex)
+            {
+                monitoreo = await _monitoreoApiAppService.ErrorMonitoreo(monitoreo, ex.Message);
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
+                throw;
+            }
         }
 
 
