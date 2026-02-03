@@ -2,6 +2,7 @@
 using SeriesDB.Domain.Notificaciones;
 using SeriesDB.EntityFrameworkCore;
 using SeriesDB.Notificaciones;
+using SeriesDB.Repositories.Notificaciones;
 using Shouldly;
 using System;
 using System.Collections.Generic;
@@ -17,18 +18,20 @@ namespace SeriesDB.Tests.Notificaciones
     public abstract class NotificacionServiceTests<TStartupModule> : SeriesDBTestBase<TStartupModule>
     where TStartupModule : IAbpModule
     {
-        private readonly INotificacionAppService _notificacionAppService;
+        protected readonly INotificacionAppService _notificacionAppService;
         private readonly SeriesDBDbContext _dbContext;
+        protected readonly IConfigNotificacionRepository _configNotificacionRepository;
 
         protected NotificacionServiceTests()
         {
             _notificacionAppService = GetRequiredService<INotificacionAppService>();
             _dbContext = GetRequiredService<SeriesDBDbContext>();
+            _configNotificacionRepository = GetRequiredService<IConfigNotificacionRepository>();
         }
 
 
         // Método helper para crear usuarios de prueba
-        private async Task<Guid> CreateTestUserAsync(Guid? userId = null)
+        protected async Task<Guid> CreateTestUserAsync(Guid? userId = null)
         {
             var id = userId ?? Guid.NewGuid();
             var testUser = new IdentityUser(
@@ -113,5 +116,69 @@ namespace SeriesDB.Tests.Notificaciones
     // Concrete implementation that Test Explorer can discover
     public class NotificacionAppServiceTests : NotificacionServiceTests<SeriesDBEntityFrameworkCoreTestModule>
     {
+        [Fact]
+        public async Task Should_Update_Notification_Configuration()
+        {
+            // Arrange
+            var usuarioId = await CreateTestUserAsync();
+            ConfigNotificacion config = null;
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                // Crear configuración inicial
+                config = new ConfigNotificacion(usuarioId, notificacionPantalla: true, notificacionEmail: false);
+                await _configNotificacionRepository.InsertAsync(config);
+            });
+
+            // Act
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _notificacionAppService.ModificarConfiguracionNotificacionAsync(
+                    usuarioId,
+                    notificacionPantalla: false,
+                    notificacionEmail: true
+                );
+            });
+
+            // Assert
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var configActualizada = await _configNotificacionRepository.GetAsync(x => x.IdUsuario == usuarioId);
+                configActualizada.ShouldNotBeNull();
+                configActualizada.NotificacionPantalla.ShouldBeFalse();
+                configActualizada.NotificacionEmail.ShouldBeTrue();
+            });
+        }
+
+        [Fact]
+        public async Task Should_Enable_Both_Notifications()
+        {
+            // Arrange
+            var usuarioId = await CreateTestUserAsync();
+
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var config = new ConfigNotificacion(usuarioId, notificacionPantalla: false, notificacionEmail: false);
+                await _configNotificacionRepository.InsertAsync(config);
+            });
+
+            // Act
+            await WithUnitOfWorkAsync(async () =>
+            {
+                await _notificacionAppService.ModificarConfiguracionNotificacionAsync(
+                    usuarioId,
+                    notificacionPantalla: true,
+                    notificacionEmail: true
+                );
+            });
+
+            // Assert
+            await WithUnitOfWorkAsync(async () =>
+            {
+                var configActualizada = await _configNotificacionRepository.GetAsync(x => x.IdUsuario == usuarioId);
+                configActualizada.NotificacionPantalla.ShouldBeTrue();
+                configActualizada.NotificacionEmail.ShouldBeTrue();
+            });
+        }
     }
 }

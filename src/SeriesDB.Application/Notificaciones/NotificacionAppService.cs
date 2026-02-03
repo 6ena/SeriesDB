@@ -12,6 +12,7 @@ namespace SeriesDB.Notificaciones
     {
         
         private readonly INotificacionRepository _notificacionRepository;
+        private readonly IConfigNotificacionRepository _configNotificacionRepository;
         private readonly IEnumerable<INotificador> _notificadores;
 
 
@@ -34,9 +35,11 @@ namespace SeriesDB.Notificaciones
 
         public NotificacionAppService(
             INotificacionRepository notificacionRepository,
+            IConfigNotificacionRepository configNotificacionRepository,
             IEnumerable<INotificador> notificadores)
         {
             _notificacionRepository = notificacionRepository;
+            _configNotificacionRepository = configNotificacionRepository;
             _notificadores = notificadores;
         }
 
@@ -71,6 +74,13 @@ namespace SeriesDB.Notificaciones
             {
                 await notificador.EnviarNotificacionAsync(notificacionDto); // Usar el DTO aquí
             }
+        }
+
+        public async Task ModificarConfiguracionNotificacionAsync(Guid usuarioId, bool notificacionPantalla, bool notificacionEmail)
+        {
+            var config = await _configNotificacionRepository.GetAsync(x => x.IdUsuario == usuarioId);
+            config.ActualizarPreferencias(notificacionPantalla, notificacionEmail);
+            await _configNotificacionRepository.UpdateAsync(config);
         }
     }
 }

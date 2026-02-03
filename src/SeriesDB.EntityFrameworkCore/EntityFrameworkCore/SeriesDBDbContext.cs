@@ -34,6 +34,7 @@ public class SeriesDBDbContext :
     public DbSet<Episodio> Episodios { get; set; }
     public DbSet<ListaDeSeguimiento> ListasDeSeguimiento { get; set; }
     public DbSet<Notificacion> Notificaciones { get; set; }
+    public DbSet<ConfigNotificacion> ConfigNotificaciones { get; set; }
     public DbSet<Calificacion> Calificaciones { get; set; }
     public DbSet<MonitoreoApi> MonitoreosApi { get; set; }
     #region Entities from the modules
@@ -222,6 +223,24 @@ public class SeriesDBDbContext :
             .IsRequired();
         });
         
+
+        builder.Entity<ConfigNotificacion>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "ConfigNotificacion",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.NotificacionPantalla).IsRequired();
+            b.Property(x => x.NotificacionEmail).IsRequired();
+
+            // Relación con el Usuario (IdentityUser)
+            b.HasOne<IdentityUser>()
+             .WithOne()
+             .HasForeignKey<ConfigNotificacion>(c => c.IdUsuario)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+            b.HasIndex(c => c.IdUsuario).IsUnique();
+        });
+
 
         builder.Entity<Calificacion>(b =>
         {
