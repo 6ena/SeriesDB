@@ -34,6 +34,8 @@ public class SeriesDBDbContext :
     public DbSet<Episodio> Episodios { get; set; }
     public DbSet<ListaDeSeguimiento> ListasDeSeguimiento { get; set; }
     public DbSet<Notificacion> Notificaciones { get; set; }
+    public DbSet<Calificacion> Calificaciones { get; set; }
+    public DbSet<MonitoreoApi> MonitoreosApi { get; set; }
     #region Entities from the modules
 
     /* Notice: We only implemented IIdentityProDbContext 
@@ -221,7 +223,6 @@ public class SeriesDBDbContext :
         });
         
 
-
         builder.Entity<Calificacion>(b =>
         {
             b.ToTable(SeriesDBConsts.DbTablePrefix + "Calificacion",
@@ -244,6 +245,19 @@ public class SeriesDBDbContext :
              .HasForeignKey(c => c.IdUsuario)
              .OnDelete(DeleteBehavior.Cascade)
              .IsRequired();
+        });
+
+
+        builder.Entity<MonitoreoApi>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "MonitoreoApi",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.HoraAcceso).IsRequired();
+            b.Property(x => x.HoraFin).IsRequired();
+            b.Property(x => x.TiempoRespuesta).IsRequired();
+            b.Property(x => x.Errores);
+
         });
     }
 }
