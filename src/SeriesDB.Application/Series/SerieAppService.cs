@@ -188,11 +188,11 @@ namespace SeriesDB.Series
 
                 serie.Calificaciones.Add(calificacion);
                 await _serieRepository.UpdateAsync(serie);
-                Logger.LogInformation("Serie calificada correctamente.");
+                //Logger.LogInformation("Serie calificada correctamente.");
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Error al calificar la serie.");
+                //Logger.LogError(ex, "Error al calificar la serie.");
                 throw;
             }
         }
@@ -231,11 +231,11 @@ namespace SeriesDB.Series
                 calificacionExistente.FechaCreacion = DateTime.Now;
 
                 await _serieRepository.UpdateAsync(serie);
-                Logger.LogInformation("Calificación modificada correctamente.");
+                //Logger.LogInformation("Calificación modificada correctamente.");
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Error al modificar la calificación.");
+                //Logger.LogError(ex, "Error al modificar la calificación.");
                 throw;
             }
         }

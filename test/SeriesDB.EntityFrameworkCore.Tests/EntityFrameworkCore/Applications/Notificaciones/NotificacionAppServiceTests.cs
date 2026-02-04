@@ -117,7 +117,7 @@ namespace SeriesDB.Tests.Notificaciones
     public class NotificacionAppServiceTests : NotificacionServiceTests<SeriesDBEntityFrameworkCoreTestModule>
     {
         [Fact]
-        public async Task Should_Update_Notification_Configuration()
+        public async Task ModificarConfiguracionNotificacionAsyncShould_Update_Notification_Configuration()
         {
             // Arrange
             var usuarioId = await CreateTestUserAsync();
@@ -151,7 +151,7 @@ namespace SeriesDB.Tests.Notificaciones
         }
 
         [Fact]
-        public async Task Should_Enable_Both_Notifications()
+        public async Task ModificarConfiguracionNotificacionAsyncShould_Enable_Both_Notifications()
         {
             // Arrange
             var usuarioId = await CreateTestUserAsync();
