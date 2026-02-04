@@ -149,7 +149,7 @@ namespace SeriesDB.ListasDeSeguimiento
         }
 
 
-        public async Task<SerieDto[]> BuscarSeriesDeListaAsync(string titulo, string genero = null)
+        public async Task<SerieDto[]> BuscarSeriesListaAsync(string titulo, string genero = null)
         {
             //Hay que estar logueado 
             Guid userId = (Guid)_currentUser.Id;

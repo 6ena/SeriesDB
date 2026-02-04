@@ -1,6 +1,7 @@
 ﻿using Autofac.Core;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NSubstitute;
 using SeriesDB;
@@ -32,6 +33,7 @@ namespace SeriesDB.Tests.Series
         private readonly Mock<ISeriesApiService> _seriesApiServiceMock;
         private readonly Mock<IObjectMapper> _objectMapper;
         private readonly Mock<IMonitoreoApiAppService> _monitoreoApiAppService;
+        private readonly Mock<ILogger<MonitoreoApiAppService>> _loggerMock;
         private readonly SerieAppService _serieAppService;
 
         public SerieAppServiceTests()
@@ -41,12 +43,14 @@ namespace SeriesDB.Tests.Series
             _seriesApiServiceMock = new Mock<ISeriesApiService>();
             _objectMapper = new Mock<IObjectMapper>();
             _monitoreoApiAppService = new Mock<IMonitoreoApiAppService> { };
+            _loggerMock = new Mock<ILogger<MonitoreoApiAppService>>();
             _serieAppService = new SerieAppService(
                 _serieRepositoryMock.Object,
                 _seriesApiServiceMock.Object,
                 _objectMapper.Object,
                 _currentUserServiceMock.Object,
-                _monitoreoApiAppService.Object
+                _monitoreoApiAppService.Object,
+                _loggerMock.Object
             );
         }
 

@@ -13,7 +13,7 @@ namespace SeriesDB.ListasDeSeguimiento
         Task AddSerieListaAsync(SerieDto serieDto);
         //Task RemoveSerieListaAsync(SerieDto serieDto);
         Task RemoveSerieListaAsync(string ImdbId);
-        Task<SerieDto[]> BuscarSeriesDeListaAsync(string titulo, string genero = null); //genero = null makes the parameter optional
+        Task<SerieDto[]> BuscarSeriesListaAsync(string titulo, string genero = null); //genero = null makes the parameter optional
 
     }
 }

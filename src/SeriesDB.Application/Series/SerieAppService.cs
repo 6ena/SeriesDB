@@ -26,13 +26,15 @@ namespace SeriesDB.Series
         private readonly IObjectMapper _objectMapper;
         private readonly ICurrentUserService _currentUserService;
         private readonly IMonitoreoApiAppService _monitoreoApiAppService;
+        private readonly ILogger<MonitoreoApiAppService> _logger;
 
         public SerieAppService(
             IRepository<Serie, int> repository,
             ISeriesApiService seriesApiService,
             IObjectMapper objectMapper,
             ICurrentUserService currentUserService,
-            IMonitoreoApiAppService monitoreoApiAppService)
+            IMonitoreoApiAppService monitoreoApiAppService,
+            ILogger<MonitoreoApiAppService> logger)
         : base(repository)
         {
             _seriesApiService = seriesApiService;
@@ -40,6 +42,7 @@ namespace SeriesDB.Series
             _objectMapper = objectMapper;
             _currentUserService = currentUserService;
             _monitoreoApiAppService = monitoreoApiAppService;
+            _logger = logger;
         }
 
         public async Task<SerieDto[]> BuscarSerieAsync(string titulo, string genero = null)
@@ -188,11 +191,11 @@ namespace SeriesDB.Series
 
                 serie.Calificaciones.Add(calificacion);
                 await _serieRepository.UpdateAsync(serie);
-                //Logger.LogInformation("Serie calificada correctamente.");
+                _logger.LogInformation("Serie calificada correctamente.");
             }
             catch (Exception ex)
             {
-                //Logger.LogError(ex, "Error al calificar la serie.");
+                _logger.LogError(ex, "Error al calificar la serie.");
                 throw;
             }
         }
@@ -231,11 +234,11 @@ namespace SeriesDB.Series
                 calificacionExistente.FechaCreacion = DateTime.Now;
 
                 await _serieRepository.UpdateAsync(serie);
-                //Logger.LogInformation("Calificación modificada correctamente.");
+                _logger.LogInformation("Calificación modificada correctamente.");
             }
             catch (Exception ex)
             {
-                //Logger.LogError(ex, "Error al modificar la calificación.");
+                _logger.LogError(ex, "Error al modificar la calificación.");
                 throw;
             }
         }
