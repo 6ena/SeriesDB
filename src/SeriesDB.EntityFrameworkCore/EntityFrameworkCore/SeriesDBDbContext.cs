@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
@@ -9,9 +10,14 @@ using Volo.Abp.EntityFrameworkCore.Modeling;
 using Volo.Abp.FeatureManagement.EntityFrameworkCore;
 using Volo.Abp.Identity;
 using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
-using Volo.Abp.OpenIddict.EntityFrameworkCore;
+//SeriesDB
+using SeriesDB.Series;
+using SeriesDB.ListasDeSeguimiento;
+using SeriesDB.Domain.Notificaciones;
+
 
 namespace SeriesDB.EntityFrameworkCore;
 
@@ -23,7 +29,14 @@ public class SeriesDBDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
-
+    public DbSet<Serie> Series { get; set; }
+    public DbSet<Temporada> Temporadas { get; set; }
+    public DbSet<Episodio> Episodios { get; set; }
+    public DbSet<ListaDeSeguimiento> ListasDeSeguimiento { get; set; }
+    public DbSet<Notificacion> Notificaciones { get; set; }
+    public DbSet<ConfigNotificacion> ConfigNotificaciones { get; set; }
+    public DbSet<Calificacion> Calificaciones { get; set; }
+    public DbSet<MonitoreoApi> MonitoreosApi { get; set; }
     #region Entities from the modules
 
     /* Notice: We only implemented IIdentityProDbContext 
@@ -69,7 +82,7 @@ public class SeriesDBDbContext :
         builder.ConfigureIdentity();
         builder.ConfigureOpenIddict();
         builder.ConfigureBlobStoring();
-        
+
         /* Configure your own tables/entities inside here */
 
         //builder.Entity<YourEntity>(b =>
@@ -78,5 +91,192 @@ public class SeriesDBDbContext :
         //    b.ConfigureByConvention(); //auto configure for the base class props
         //    //...
         //});
+
+
+        builder.Entity<Serie>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Series", SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Generos).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Sinopsis).IsRequired().HasMaxLength(300);
+            b.Property(x => x.FechaEstreno).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Duracion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Clasificacion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Idiomas).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Directores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Escritores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Actores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Poster).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Pais).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ImdbId).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ImdbCalificacion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.ImdbVotos).IsRequired(); // No HasMaxLength for int
+            b.Property(x => x.Tipo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.TotalTemporadas).IsRequired(); // No HasMaxLength for int
+
+            // Relación con Temporadas
+            b.HasMany(s => s.Temporadas)
+             .WithOne(t => t.Serie)
+             .HasForeignKey(t => t.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+
+            // Relación con Calificaciones
+            b.HasMany(s => s.Calificaciones)
+             .WithOne(c => c.Serie)
+             .HasForeignKey(c => c.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+
+
+        builder.Entity<Temporada>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Temporadas",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.FechaLanzamiento).IsRequired().HasMaxLength(128);
+            b.Property(x => x.NroTemporada).IsRequired();
+
+            // Relación con Serie
+            b.HasOne(t => t.Serie)
+             .WithMany(s => s.Temporadas)
+             .HasForeignKey(t => t.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+
+            // Relación con Episodios
+            b.HasMany(t => t.Episodios)
+             .WithOne(e => e.Temporada)
+             .HasForeignKey(e => e.TemporadaID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+
+
+        builder.Entity<Episodio>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Episodios",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.NroEpisodio).IsRequired();
+            b.Property(x => x.Titulo).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Duracion).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Resumen).IsRequired().HasMaxLength(128);
+            b.Property(x => x.FechaEstreno).IsRequired();
+            b.Property(x => x.Directores).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Escritores).IsRequired().HasMaxLength(128);
+
+            // Relación con Temporada
+            b.HasOne(e => e.Temporada)
+             .WithMany(t => t.Episodios)
+             .HasForeignKey(e => e.TemporadaID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+
+
+        builder.Entity<ListaDeSeguimiento>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "ListasDeSeguimiento",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.FechaModificacion).IsRequired();
+
+            // Relación con Serie. Tabla intermedia ListaSeguimientoSerie para la relación muchos a muchos
+            b.HasMany(ls => ls.Series)
+             .WithMany()
+             .UsingEntity<Dictionary<string, object>>( // Tabla intermedia para seguir las series de cada lista
+                "ListaSeguimientoSerie",  // Nombre de la tabla intermedia
+                j => j.HasOne<Serie>().WithMany().HasForeignKey("SerieId").OnDelete(DeleteBehavior.Cascade),
+                j => j.HasOne<ListaDeSeguimiento>().WithMany().HasForeignKey("ListaDeSeguimientoId").OnDelete(DeleteBehavior.Cascade)
+             );
+
+            // Relación con el Usuario (IdentityUser)
+            b.HasOne<IdentityUser>()
+             .WithOne()
+             .HasForeignKey<ListaDeSeguimiento>(u => u.IdUsuario)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+            b.HasIndex(u => u.IdUsuario).IsUnique(); // Para garantizar un solo registro por usuario
+        });
+
+
+        builder.Entity<Notificacion>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Notificacion",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.Titulo).IsRequired();
+            b.Property(x => x.Mensaje).IsRequired();
+            b.Property(x => x.Leida).IsRequired();
+            b.Property(x => x.Tipo).IsRequired();
+            b.Property(x => x.FechaCreacion).IsRequired();
+
+            // Relación con el Usuario (IdentityUser)
+            b.HasOne<IdentityUser>()
+            .WithMany()
+            .HasForeignKey(n => n.IdUsuario)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+        });
+        
+
+        builder.Entity<ConfigNotificacion>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "ConfigNotificacion",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.NotificacionPantalla).IsRequired();
+            b.Property(x => x.NotificacionEmail).IsRequired();
+
+            // Relación con el Usuario (IdentityUser)
+            b.HasOne<IdentityUser>()
+             .WithOne()
+             .HasForeignKey<ConfigNotificacion>(c => c.IdUsuario)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+            b.HasIndex(c => c.IdUsuario).IsUnique();
+        });
+
+
+        builder.Entity<Calificacion>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "Calificacion",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.NroCalificacion).IsRequired();
+            b.Property(x => x.Comentario);
+            b.Property(x => x.FechaCreacion).IsRequired();
+
+            // Relación con Serie
+            b.HasOne(c => c.Serie)
+             .WithMany(s => s.Calificaciones)
+             .HasForeignKey(c => c.SerieID)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+
+            // Relación con el Usuario (IdentityUser)
+            b.HasOne<IdentityUser>()
+             .WithMany()
+             .HasForeignKey(c => c.IdUsuario)
+             .OnDelete(DeleteBehavior.Cascade)
+             .IsRequired();
+        });
+
+
+        builder.Entity<MonitoreoApi>(b =>
+        {
+            b.ToTable(SeriesDBConsts.DbTablePrefix + "MonitoreoApi",
+                SeriesDBConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.HoraAcceso).IsRequired();
+            b.Property(x => x.HoraFin).IsRequired();
+            b.Property(x => x.TiempoRespuesta).IsRequired();
+            b.Property(x => x.Errores);
+
+        });
     }
 }

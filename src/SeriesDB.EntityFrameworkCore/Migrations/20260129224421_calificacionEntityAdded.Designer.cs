@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SeriesDB.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace SeriesDB.Migrations
 {
     [DbContext(typeof(SeriesDBDbContext))]
-    partial class SeriesDBDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260129224421_calificacionEntityAdded")]
+    partial class calificacionEntityAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,28 +40,6 @@ namespace SeriesDB.Migrations
                     b.HasIndex("SerieId");
 
                     b.ToTable("ListaSeguimientoSerie");
-                });
-
-            modelBuilder.Entity("SeriesDB.Domain.Notificaciones.ConfigNotificacion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("IdUsuario")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("NotificacionEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("NotificacionPantalla")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdUsuario")
-                        .IsUnique();
-
-                    b.ToTable("AppConfigNotificacion", (string)null);
                 });
 
             modelBuilder.Entity("SeriesDB.Domain.Notificaciones.Notificacion", b =>
@@ -240,32 +221,6 @@ namespace SeriesDB.Migrations
                     b.HasIndex("TemporadaID");
 
                     b.ToTable("AppEpisodios", (string)null);
-                });
-
-            modelBuilder.Entity("SeriesDB.Series.MonitoreoApi", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.PrimitiveCollection<string>("Errores")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("HoraAcceso")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("HoraFin")
-                        .HasColumnType("datetime2");
-
-                    b.Property<float>("TiempoRespuesta")
-                        .HasColumnType("real");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppMonitoreoApi", (string)null);
                 });
 
             modelBuilder.Entity("SeriesDB.Series.Serie", b =>
@@ -2187,15 +2142,6 @@ namespace SeriesDB.Migrations
                     b.HasOne("SeriesDB.Series.Serie", null)
                         .WithMany()
                         .HasForeignKey("SerieId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SeriesDB.Domain.Notificaciones.ConfigNotificacion", b =>
-                {
-                    b.HasOne("Volo.Abp.Identity.IdentityUser", null)
-                        .WithOne()
-                        .HasForeignKey("SeriesDB.Domain.Notificaciones.ConfigNotificacion", "IdUsuario")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
