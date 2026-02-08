@@ -1,21 +1,26 @@
 import { RoutesService, eLayoutType } from '@abp/ng.core';
-import { inject, provideAppInitializer } from '@angular/core';
+import { APP_INITIALIZER, inject } from '@angular/core';
 
 export const APP_ROUTE_PROVIDER = [
-  provideAppInitializer(() => {
-    configureRoutes();
-  }),
+  {
+    provide: APP_INITIALIZER,
+    useFactory: configureRoutes,
+    multi: true,
+  },
 ];
 
 function configureRoutes() {
   const routes = inject(RoutesService);
-  routes.add([
+
+  return () => {
+    routes.add([
       {
         path: '/',
         name: '::Menu:Home',
         iconClass: 'fas fa-home',
         order: 1,
         layout: eLayoutType.application,
-      },
-  ]);
+      }
+    ]);
+  };
 }
