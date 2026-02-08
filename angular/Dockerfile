@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:18-alpine as build
 
 WORKDIR /app
 COPY package*.json /app/
@@ -12,4 +12,5 @@ FROM nginx:alpine
 COPY dynamic-env.json /usr/share/nginx/html
 COPY nginx.conf  /etc/nginx/conf.d/default.conf
 
-COPY --from=build /app/dist/SeriesDB/browser /usr/share/nginx/html
+COPY --from=build /app/dist/SeriesDB /usr/share/nginx/html
+

@@ -1,0 +1,34 @@
+<h2>Monitoreos de la API</h2>
+
+<div class="monitoreos">
+  <ngx-datatable *ngIf="monitoreos.length" class="bootstrap" [rows]="monitoreos" [columnMode]="'flex'"
+    [headerHeight]="50" [footerHeight]="50" [rowHeight]="'auto'">
+    <ngx-datatable-column name="Hora de Inicio" prop="horaAcceso" [flexGrow]="2"></ngx-datatable-column>
+    <ngx-datatable-column name="Hora de Salida" prop="horaFin" [flexGrow]="2"></ngx-datatable-column>
+    <ngx-datatable-column name="Duración (seg)" prop="tiempoRespuesta" [flexGrow]="1"></ngx-datatable-column>
+    <ngx-datatable-column name="Errores" [flexGrow]="1">
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        {{ row.errores?.length || 0 }}
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
+</div>
+
+<h2>Estadísticas</h2>
+<div class="estadisticas" *ngIf="estadisticas">
+  <div class="tarjeta">
+    <i class="fas fa-clock"></i>
+    <p>Promedio de Duración</p>
+    <h3>{{ estadisticas.promedioTiempoRespuesta?.toFixed(2) }} seg</h3>
+  </div>
+  <div class="tarjeta">
+    <i class="fas fa-bug"></i>
+    <p>Total de Errores</p>
+    <h3>{{ estadisticas.cantidadErrores }}</h3>
+  </div>
+  <div class="tarjeta">
+    <i class="fas fa-chart-line"></i>
+    <p>Total de Monitoreos</p>
+    <h3>{{ estadisticas.cantidadMonitoreos }}</h3>
+  </div>
+</div>

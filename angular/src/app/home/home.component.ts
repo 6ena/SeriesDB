@@ -1,20 +1,15 @@
-import { Component, inject } from '@angular/core';
-import { AuthService, LocalizationPipe } from '@abp/ng.core';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports: [LocalizationPipe]
 })
 export class HomeComponent {
-  private authService = inject(AuthService);
+  constructor(private router: Router) {}
 
-  get hasLoggedIn(): boolean {
-    return this.authService.isAuthenticated
-  }
-
-  login() {
-    this.authService.navigateToLogin();
+  navigateTo(route: string) {
+    this.router.navigate([`/${route}`]);
   }
 }

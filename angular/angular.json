@@ -19,15 +19,12 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular/build:application",
+          "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": {
-              "base": "dist/SeriesDB"
-            },
+            "outputPath": "dist/SeriesDB",
             "index": "src/index.html",
-            "polyfills": [
-              "src/polyfills.ts"
-            ],
+            "main": "src/main.ts",
+            "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "allowedCommonJsDependencies": ["chart.js", "js-sha256"],
@@ -36,11 +33,6 @@
               "src/assets",
               {
                 "glob": "web.config",
-                "input": ".",
-                "output": "."
-              },
-              {
-                "glob": "dynamic-env.json",
                 "input": ".",
                 "output": "."
               }
@@ -55,11 +47,6 @@
                 "input": "node_modules/@fortawesome/fontawesome-free/css/v4-shims.min.css",
                 "inject": true,
                 "bundleName": "fontawesome-v4-shims.min"
-              },
-              {
-                "input": "node_modules/ng-zorro-antd/tree/style/index.min.css",
-                "inject": false,
-                "bundleName": "ng-zorro-antd-tree"
               },
               {
                 "input": "node_modules/@swimlane/ngx-datatable/index.css",
@@ -77,70 +64,25 @@
                 "bundleName": "ngx-datatable-material"
               },
               {
-                "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/bootstrap-dim.css",
+                "input": "node_modules/bootstrap/dist/css/bootstrap.rtl.min.css",
                 "inject": false,
-                "bundleName": "bootstrap-dim"
+                "bundleName": "bootstrap-rtl.min"
               },
               {
-                "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/ng-bundle.css",
-                "inject": false,
-                "bundleName": "ng-bundle"
-              },
-              {
-                "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/side-menu/layout-bundle.css",
-                "inject": false,
-                "bundleName": "layout-bundle"
-              },
-              {
-                "input": "node_modules/@abp/ng.theme.lepton-x/assets/css/abp-bundle.css",
-                "inject": false,
-                "bundleName": "abp-bundle"
-              },
-              {
-                "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/bootstrap-dim.rtl.css",
-                "inject": false,
-                "bundleName": "bootstrap-dim.rtl"
-              },
-              {
-                "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/font-bundle.css",
-                "inject": false,
-                "bundleName": "font-bundle"
-              },
-              {
-                "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/font-bundle.rtl.css",
-                "inject": false,
-                "bundleName": "font-bundle.rtl"
-              },
-              {
-                "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/ng-bundle.rtl.css",
-                "inject": false,
-                "bundleName": "ng-bundle.rtl"
-              },
-              {
-                "input": "node_modules/@volo/ngx-lepton-x.lite/assets/css/side-menu/layout-bundle.rtl.css",
-                "inject": false,
-                "bundleName": "layout-bundle.rtl"
-              },
-              {
-                "input": "node_modules/@abp/ng.theme.lepton-x/assets/css/abp-bundle.rtl.css",
-                "inject": false,
-                "bundleName": "abp-bundle.rtl"
-              },
-              {
-                "input": "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+                "input": "node_modules/bootstrap/dist/css/bootstrap.min.css",
                 "inject": true,
-                "bundleName": "bootstrap-icons"
+                "bundleName": "bootstrap-ltr.min"
               },
-              "src/styles.scss"
+              {
+                "input": "node_modules/ng-zorro-antd/tree/style/index.min.css",
+                "inject": false,
+                "bundleName": "ng-zorro-antd-tree"
+              },
             ],
-            "scripts": [],
-            "browser": "src/main.ts"
+            "scripts": []
           },
           "configurations": {
             "production": {
-              "optimization": {
-                "fonts": false
-              },
               "budgets": [
                 {
                   "type": "initial",
@@ -162,7 +104,9 @@
               "outputHashing": "all"
             },
             "development": {
+              "buildOptimizer": false,
               "optimization": false,
+              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
@@ -171,7 +115,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "SeriesDB:build:production"
@@ -183,13 +127,13 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular/build:extract-i18n",
+          "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
             "buildTarget": "SeriesDB:build"
           }
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
@@ -211,3 +155,4 @@
     }
   }
 }
+
