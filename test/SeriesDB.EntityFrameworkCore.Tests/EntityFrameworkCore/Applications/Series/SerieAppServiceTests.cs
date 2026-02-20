@@ -94,7 +94,7 @@ namespace SeriesDB.Tests.Series
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(NroTemporada, result.NroTemporada);
+            Assert.Equal(temporada, result);
         }
 
         //Tests para calificar serie

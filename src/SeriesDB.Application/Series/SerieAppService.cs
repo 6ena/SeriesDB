@@ -72,7 +72,6 @@ namespace SeriesDB.Series
             {
                 var temporada = await _seriesApiService.BuscarTemporadaAsync(imdbId, nroTemporada);
                 monitoreo = await _monitoreoApiAppService.FinalizarMonitoreo(monitoreo);
-                return await _seriesApiService.BuscarTemporadaAsync(imdbId, nroTemporada);
                 return temporada;
             }
             catch (Exception ex)
