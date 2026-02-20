@@ -72,6 +72,7 @@ namespace SeriesDB.Series
             {
                 var temporada = await _seriesApiService.BuscarTemporadaAsync(imdbId, nroTemporada);
                 monitoreo = await _monitoreoApiAppService.FinalizarMonitoreo(monitoreo);
+                await _monitoreoApiAppService.PersistirMonitoreoAsync(monitoreo);
                 return temporada;
             }
             catch (Exception ex)
@@ -142,6 +143,8 @@ namespace SeriesDB.Series
             {
                 if (serieExistente.TotalTemporadas == serieDto.TotalTemporadas)
                 {
+                    //demasiado extremo.
+                    //localizar para el idioma del usuario.
                     throw new InvalidOperationException("Serie ya esta persistida");
                 }
                 else
